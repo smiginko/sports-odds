@@ -15,6 +15,28 @@
         </a>
       </li>
     </ul>
+
+    <div class="ml-auto text-sm font-medium">
+      @if (auth.email(); as email) {
+        <a
+          routerLink="/client"
+          routerLinkActive
+          ariaCurrentWhenActive="page"
+          class="block max-w-48 truncate text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
+        >
+          {{ email }}
+        </a>
+      } @else {
+        <a
+          routerLink="/login"
+          routerLinkActive
+          ariaCurrentWhenActive="page"
+          class="text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
+        >
+          Prihlásiť sa
+        </a>
+      }
+    </div>
   </nav>
 </header>
 
