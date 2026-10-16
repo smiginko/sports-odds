@@ -5,9 +5,12 @@ export interface Odds {
   away: number | null;
 }
 
-export interface BookmakerOdds {
+export interface Bookmaker {
   key: string;
   title: string;
+}
+
+export interface BookmakerOdds extends Bookmaker {
   odds: Odds;
 }
 
