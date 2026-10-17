@@ -1,0 +1,59 @@
+@let match = row().match;
+
+<article
+  class="grid h-full grid-cols-[1fr_auto] content-center items-center gap-x-3 gap-y-2 rounded-lg border border-slate-200 bg-white px-3 ring-emerald-500 sm:grid-cols-[1fr_auto_auto] sm:px-4"
+  [class.ring-2]="row().selected"
+>
+  <div class="col-span-2 min-w-0 sm:col-span-1">
+    <p class="truncate text-xs text-slate-500">
+      <time [attr.datetime]="match.commenceTime">
+        {{ match.commenceTime | date: 'EEE d. M. HH:mm' }}
+      </time>
+      · {{ match.sportTitle }}
+      @if (row().demo) {
+        <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-600">
+          DEMO
+        </span>
+      }
+    </p>
+    @if (row().demo) {
+      <p class="truncate font-medium">{{ match.homeTeam }} – {{ match.awayTeam }}</p>
+    } @else {
+      <a
+        [routerLink]="['/sports', match.sportKey, 'events', match.id]"
+        class="block truncate font-medium hover:text-emerald-700 hover:underline"
+      >
+        {{ match.homeTeam }} – {{ match.awayTeam }}
+      </a>
+    }
+  </div>
+
+  <dl class="grid grid-cols-3 gap-2 text-center">
+    @for (cell of row().cells; track cell.label) {
+      <div
+        class="min-w-14 rounded-md bg-slate-100 px-2 py-1 ring-amber-500 sm:min-w-16"
+        [class.ring-2]="cell.highlighted"
+      >
+        <dt class="text-xs text-slate-500">{{ cell.label }}</dt>
+        <dd class="font-semibold tabular-nums">
+          <app-odds-value [value]="cell.value" />
+        </dd>
+      </div>
+    }
+  </dl>
+
+  <div class="flex items-center justify-end gap-1">
+    @if (!row().demo) {
+      <app-favorite-button [match]="match" />
+    }
+    <button
+      type="button"
+      [attr.aria-pressed]="row().selected"
+      [attr.aria-label]="'Vybrať zápas ' + match.homeTeam + ' – ' + match.awayTeam"
+      (click)="selectMatch.emit()"
+      class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 aria-pressed:border-emerald-700 aria-pressed:bg-emerald-700 aria-pressed:text-white"
+    >
+      Vybrať
+    </button>
+  </div>
+</article>

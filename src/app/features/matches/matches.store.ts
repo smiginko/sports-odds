@@ -30,6 +30,20 @@ const initialState: MatchesState = {
   highlightIndex: null,
 };
 
+export interface OddsCell {
+  label: string;
+  value: number | null;
+  highlighted: boolean;
+}
+
+/** Everything one row of the list needs; produced by `rows` and shown by `MatchRow`. */
+export interface MatchRowData {
+  match: Match;
+  selected: boolean;
+  demo: boolean;
+  cells: OddsCell[];
+}
+
 const NO_ODDS: Odds = { home: null, draw: null, away: null };
 
 export const MatchesStore = signalStore(
@@ -62,14 +76,14 @@ export const MatchesStore = signalStore(
       selectedValues,
       highlightedValue,
       title: computed(() => matches().at(0)?.sportTitle ?? 'Zápasy'),
-      rows: computed(() => {
+      rows: computed((): MatchRowData[] => {
         const key = bookmaker()?.key;
         const lit = highlightedValue();
 
         return filteredMatches().map((match) => {
           const odds = oddsOf(match, key);
           const selected = match.id === selectedMatchId();
-          const cell = (label: string, value: number | null) => ({
+          const cell = (label: string, value: number | null): OddsCell => ({
             label,
             value,
             highlighted: selected && value !== null && value === lit,

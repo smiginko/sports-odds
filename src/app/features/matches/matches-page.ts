@@ -1,16 +1,31 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import {
+  CdkFixedSizeVirtualScroll,
+  CdkVirtualForOf,
+  CdkVirtualScrollableWindow,
+  CdkVirtualScrollViewport,
+} from '@angular/cdk/scrolling';
+import { DecimalPipe } from '@angular/common';
 import { booleanAttribute, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ErrorState } from '../../shared/ui/error-state';
 import { LoadingState } from '../../shared/ui/loading-state';
-import { OddsValue } from '../../shared/ui/odds-value';
-import { FavoriteButton } from '../favorites/favorite-button';
 import { DEMO_MATCH_COUNT } from './demo-matches';
-import { MatchesStore } from './matches.store';
+import { MATCH_ROW_HEIGHT, MatchRow } from './match-row';
+import { MatchesStore, MatchRowData } from './matches.store';
 
 @Component({
   selector: 'app-matches-page',
-  imports: [RouterLink, DatePipe, DecimalPipe, LoadingState, ErrorState, OddsValue, FavoriteButton],
+  imports: [
+    RouterLink,
+    DecimalPipe,
+    LoadingState,
+    ErrorState,
+    MatchRow,
+    CdkVirtualScrollViewport,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualScrollableWindow,
+    CdkVirtualForOf,
+  ],
   providers: [MatchesStore],
   templateUrl: './matches-page.html',
 })
@@ -20,6 +35,7 @@ export class MatchesPage {
   readonly demo = input(false, { transform: booleanAttribute });
   protected readonly store = inject(MatchesStore);
   protected readonly demoCount = DEMO_MATCH_COUNT;
+  protected readonly rowHeight = MATCH_ROW_HEIGHT;
   protected readonly params = computed(() => ({
     sportKey: this.sportKey(),
     demo: this.demo(),
@@ -27,5 +43,9 @@ export class MatchesPage {
 
   constructor() {
     this.store.load(this.params);
+  }
+
+  protected trackById(_index: number, row: MatchRowData): string {
+    return row.match.id;
   }
 }
