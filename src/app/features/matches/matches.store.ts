@@ -39,6 +39,8 @@ const initialState: MatchesState = {
 };
 
 export interface OddsCell {
+  /** Identity of these odds, `match:bookmaker:label`; the cell flashes only when this stays the same. */
+  id: string;
   label: string;
   value: number | null;
   highlighted: boolean;
@@ -92,6 +94,7 @@ export const MatchesStore = signalStore(
           const odds = oddsOf(match, key);
           const selected = match.id === selectedMatchId();
           const cell = (label: string, value: number | null): OddsCell => ({
+            id: `${match.id}:${key}:${label}`,
             label,
             value,
             highlighted: selected && value !== null && value === lit,
