@@ -86,13 +86,15 @@ function randomPair(teams: string[]): [string, string] {
 }
 
 function randomOdds(): Odds {
-  return { home: randomPrice(), draw: randomPrice(), away: randomPrice() };
+  return { home: maybePrice(), draw: maybePrice(), away: maybePrice() };
 }
 
-/** 1.00 to 5.00 with two decimals; about every tenth price is missing to show dashes too. */
-function randomPrice(): number | null {
-  if (Math.random() < 0.1) {
-    return null;
-  }
+/** About every tenth price is missing, so demo data shows dashes too. */
+function maybePrice(): number | null {
+  return Math.random() < 0.1 ? null : randomPrice();
+}
+
+/** A random decimal price from 1.00 to 5.00; also used by the live odds ticker. */
+export function randomPrice(): number {
   return Math.round((1 + Math.random() * 4) * 100) / 100;
 }

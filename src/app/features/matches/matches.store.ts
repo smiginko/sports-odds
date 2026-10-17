@@ -1,5 +1,12 @@
 import { computed, inject } from '@angular/core';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withHooks,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, map, pipe, switchMap, tap } from 'rxjs';
 import { errorMessage } from '../../core/api/error-message';
@@ -7,6 +14,7 @@ import { OddsApi } from '../../core/api/odds-api';
 import { Bookmaker, Match, Odds } from '../../core/models/match';
 import { RequestStatus } from '../../core/models/request-status';
 import { DEMO_MATCH_COUNT, generateDemoMatches, isDemoMatch } from './demo-matches';
+import { OddsChange, OddsTicker } from './odds-ticker';
 
 interface MatchesState {
   matches: Match[];
@@ -133,8 +141,47 @@ export const MatchesStore = signalStore(
         ),
       ),
     ),
+    applyChanges: rxMethod<OddsChange[]>(
+      tap((changes) => patchState(store, { matches: withChanges(store.matches(), changes) })),
+    ),
+  })),
+  withHooks((store, ticker = inject(OddsTicker)) => ({
+    onInit() {
+      // Live updates run as long as the store lives, i.e. while the matches page is open.
+      const bookmakerKey = computed(() => store.bookmaker()?.key);
+      store.applyChanges(ticker.changes(store.matches, bookmakerKey));
+    },
   })),
 );
+
+/** Returns a new array with the changed prices; only the changed matches get new objects. */
+function withChanges(matches: Match[], changes: OddsChange[]): Match[] {
+  if (changes.length === 0) {
+    return matches;
+  }
+
+  return matches.map((match) => {
+    const own = changes.filter((change) => change.matchId === match.id);
+    if (own.length === 0) {
+      return match;
+    }
+
+    return {
+      ...match,
+      bookmakers: match.bookmakers.map((bookmaker) => {
+        const forBookmaker = own.filter((change) => change.bookmakerKey === bookmaker.key);
+        if (forBookmaker.length === 0) {
+          return bookmaker;
+        }
+        const odds = { ...bookmaker.odds };
+        for (const change of forBookmaker) {
+          odds[change.outcome] = change.price;
+        }
+        return { ...bookmaker, odds };
+      }),
+    };
+  });
+}
 
 /** Demo mode: the real API response plus generated matches with the same bookmakers. */
 function withDemoMatches(matches: Match[], sportKey: string): Match[] {
