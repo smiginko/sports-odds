@@ -18,6 +18,41 @@
       <app-error-state [message]="store.error()" (retry)="store.load(sportKey())" />
     }
     @case ('success') {
+      @if (store.matches().length > 0) {
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div class="flex-1">
+            <label for="search" class="block text-sm font-medium">Hľadať tím</label>
+            <input
+              #search
+              id="search"
+              type="search"
+              placeholder="napr. Arsenal"
+              [value]="store.query()"
+              (input)="store.setQuery(search.value)"
+              class="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus:outline-2 focus:outline-emerald-600"
+            />
+          </div>
+          <div>
+            <label for="bookmaker" class="block text-sm font-medium">Bookmaker</label>
+            <select
+              #select
+              id="bookmaker"
+              (change)="store.setBookmaker(select.value)"
+              class="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus:outline-2 focus:outline-emerald-600 sm:w-56"
+            >
+              @for (bookmaker of store.bookmakers(); track bookmaker.key) {
+                <option
+                  [value]="bookmaker.key"
+                  [selected]="bookmaker.key === store.bookmaker()?.key"
+                >
+                  {{ bookmaker.title }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+      }
+
       <ul class="space-y-3">
         @for (row of store.rows(); track row.match.id) {
           <li
@@ -54,7 +89,13 @@
             </dl>
           </li>
         } @empty {
-          <li class="text-slate-600">Pre túto súťaž momentálne nie sú vypísané žiadne zápasy.</li>
+          <li class="text-slate-600">
+            @if (store.matches().length > 0) {
+              Žiadny zápas nezodpovedá hľadaniu „{{ store.query() }}“.
+            } @else {
+              Pre túto súťaž momentálne nie sú vypísané žiadne zápasy.
+            }
+          </li>
         }
       </ul>
     }

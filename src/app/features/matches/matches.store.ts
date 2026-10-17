@@ -11,27 +11,44 @@ interface MatchesState {
   matches: Match[];
   status: RequestStatus;
   error: string;
+  query: string;
+  /** `null` = no choice yet, the most common bookmaker is used. */
+  bookmakerKey: string | null;
 }
 
 const initialState: MatchesState = {
   matches: [],
   status: 'idle',
   error: '',
+  query: '',
+  bookmakerKey: null,
 };
 
 const NO_ODDS: Odds = { home: null, draw: null, away: null };
 
 export const MatchesStore = signalStore(
   withState(initialState),
-  withComputed(({ matches }) => {
-    const bookmaker = computed(() => mostCommonBookmaker(matches()));
+  withComputed(({ matches, query, bookmakerKey }) => {
+    const bookmakers = computed(() => allBookmakers(matches()));
+    const bookmaker = computed(
+      () => bookmakers().find((b) => b.key === bookmakerKey()) ?? mostCommonBookmaker(matches()),
+    );
+    const filteredMatches = computed(() => {
+      const text = query().trim().toLocaleLowerCase();
+      return matches().filter(
+        (match) =>
+          match.homeTeam.toLocaleLowerCase().includes(text) ||
+          match.awayTeam.toLocaleLowerCase().includes(text),
+      );
+    });
 
     return {
+      bookmakers,
       bookmaker,
       title: computed(() => matches().at(0)?.sportTitle ?? 'Zápasy'),
       rows: computed(() => {
         const key = bookmaker()?.key;
-        return matches().map((match) => ({
+        return filteredMatches().map((match) => ({
           match,
           odds: match.bookmakers.find((b) => b.key === key)?.odds ?? NO_ODDS,
         }));
@@ -39,6 +56,12 @@ export const MatchesStore = signalStore(
     };
   }),
   withMethods((store, api = inject(OddsApi)) => ({
+    setQuery(query: string): void {
+      patchState(store, { query });
+    },
+    setBookmaker(bookmakerKey: string): void {
+      patchState(store, { bookmakerKey });
+    },
     load: rxMethod<string>(
       pipe(
         tap(() => patchState(store, { status: 'loading' })),
@@ -55,6 +78,17 @@ export const MatchesStore = signalStore(
     ),
   })),
 );
+
+/** Every bookmaker that offers odds for at least one match, sorted by name. */
+function allBookmakers(matches: Match[]): Bookmaker[] {
+  const byKey = new Map<string, Bookmaker>();
+  for (const match of matches) {
+    for (const { key, title } of match.bookmakers) {
+      byKey.set(key, { key, title });
+    }
+  }
+  return [...byKey.values()].sort((a, b) => a.title.localeCompare(b.title));
+}
 
 /** The bookmaker with odds for the most matches, so the list shows the fewest dashes. */
 function mostCommonBookmaker(matches: Match[]): Bookmaker | undefined {
