@@ -1,11 +1,12 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { catchError, EMPTY, pipe, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, map, pipe, switchMap, tap } from 'rxjs';
 import { errorMessage } from '../../core/api/error-message';
 import { OddsApi } from '../../core/api/odds-api';
 import { Bookmaker, Match, Odds } from '../../core/models/match';
 import { RequestStatus } from '../../core/models/request-status';
+import { DEMO_MATCH_COUNT, generateDemoMatches, isDemoMatch } from './demo-matches';
 
 interface MatchesState {
   matches: Match[];
@@ -77,6 +78,7 @@ export const MatchesStore = signalStore(
           return {
             match,
             selected,
+            demo: isDemoMatch(match),
             cells: [cell('1', odds.home), cell('X', odds.draw), cell('2', odds.away)],
           };
         });
@@ -102,11 +104,12 @@ export const MatchesStore = signalStore(
       const index = store.highlightIndex();
       patchState(store, { highlightIndex: index === null ? 0 : (index + 1) % count });
     },
-    load: rxMethod<string>(
+    load: rxMethod<{ sportKey: string; demo: boolean }>(
       pipe(
         tap(() => patchState(store, { status: 'loading' })),
-        switchMap((sportKey) =>
+        switchMap(({ sportKey, demo }) =>
           api.getMatches(sportKey).pipe(
+            map((matches) => (demo ? withDemoMatches(matches, sportKey) : matches)),
             tap((matches) => patchState(store, { matches, status: 'success' })),
             catchError((error: unknown) => {
               patchState(store, { status: 'error', error: errorMessage(error) });
@@ -118,6 +121,13 @@ export const MatchesStore = signalStore(
     ),
   })),
 );
+
+/** Demo mode: the real API response plus generated matches with the same bookmakers. */
+function withDemoMatches(matches: Match[], sportKey: string): Match[] {
+  const sportTitle = matches.at(0)?.sportTitle ?? 'Demo';
+  const demo = generateDemoMatches(DEMO_MATCH_COUNT, sportKey, sportTitle, allBookmakers(matches));
+  return [...matches, ...demo];
+}
 
 function oddsOf(match: Match, bookmakerKey: string | undefined): Odds {
   return match.bookmakers.find((b) => b.key === bookmakerKey)?.odds ?? NO_ODDS;

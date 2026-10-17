@@ -2,7 +2,20 @@
   ← Všetky športy
 </a>
 
-<h1 class="mt-2 text-2xl font-bold">{{ store.title() }}</h1>
+<div class="mt-2 flex flex-wrap items-baseline justify-between gap-2">
+  <h1 class="text-2xl font-bold">{{ store.title() }}</h1>
+  <a
+    [routerLink]="[]"
+    [queryParams]="{ demo: demo() ? null : true }"
+    class="text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline"
+  >
+    @if (demo()) {
+      Vypnúť demo dáta
+    } @else {
+      Zapnúť demo dáta (+{{ demoCount | number }} zápasov)
+    }
+  </a>
+</div>
 @if (store.bookmaker(); as bookmaker) {
   <p class="mt-1 text-slate-600">
     Kurzy 1 / X / 2 od bookmakera <strong>{{ bookmaker.title }}</strong>
@@ -15,7 +28,7 @@
       <app-loading-state />
     }
     @case ('error') {
-      <app-error-state [message]="store.error()" (retry)="store.load(sportKey())" />
+      <app-error-state [message]="store.error()" (retry)="store.load(params())" />
     }
     @case ('success') {
       @if (store.matches().length > 0) {
@@ -82,12 +95,23 @@
             </time>
 
             <div>
-              <a
-                [routerLink]="['/sports', row.match.sportKey, 'events', row.match.id]"
-                class="font-medium hover:text-emerald-700 hover:underline"
-              >
-                {{ row.match.homeTeam }} – {{ row.match.awayTeam }}
-              </a>
+              @if (row.demo) {
+                <p class="font-medium">
+                  {{ row.match.homeTeam }} – {{ row.match.awayTeam }}
+                  <span
+                    class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-600"
+                  >
+                    DEMO
+                  </span>
+                </p>
+              } @else {
+                <a
+                  [routerLink]="['/sports', row.match.sportKey, 'events', row.match.id]"
+                  class="font-medium hover:text-emerald-700 hover:underline"
+                >
+                  {{ row.match.homeTeam }} – {{ row.match.awayTeam }}
+                </a>
+              }
               <p class="text-sm text-slate-500">{{ row.match.sportTitle }}</p>
             </div>
 
@@ -106,7 +130,9 @@
             </dl>
 
             <div class="flex items-center gap-2">
-              <app-favorite-button [match]="row.match" />
+              @if (!row.demo) {
+                <app-favorite-button [match]="row.match" />
+              }
               <button
                 type="button"
                 [attr.aria-pressed]="row.selected"
