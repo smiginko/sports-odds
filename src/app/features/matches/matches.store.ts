@@ -14,6 +14,9 @@ interface MatchesState {
   query: string;
   /** `null` = no choice yet, the most common bookmaker is used. */
   bookmakerKey: string | null;
+  selectedMatchId: string | null;
+  /** Position in the selected match's odds sorted from highest; `null` = nothing highlighted. */
+  highlightIndex: number | null;
 }
 
 const initialState: MatchesState = {
@@ -22,13 +25,15 @@ const initialState: MatchesState = {
   error: '',
   query: '',
   bookmakerKey: null,
+  selectedMatchId: null,
+  highlightIndex: null,
 };
 
 const NO_ODDS: Odds = { home: null, draw: null, away: null };
 
 export const MatchesStore = signalStore(
   withState(initialState),
-  withComputed(({ matches, query, bookmakerKey }) => {
+  withComputed(({ matches, query, bookmakerKey, selectedMatchId, highlightIndex }) => {
     const bookmakers = computed(() => allBookmakers(matches()));
     const bookmaker = computed(
       () => bookmakers().find((b) => b.key === bookmakerKey()) ?? mostCommonBookmaker(matches()),
@@ -41,17 +46,40 @@ export const MatchesStore = signalStore(
           match.awayTeam.toLocaleLowerCase().includes(text),
       );
     });
+    const selectedValues = computed(() => {
+      const match = matches().find((m) => m.id === selectedMatchId());
+      return match ? distinctDescending(oddsOf(match, bookmaker()?.key)) : [];
+    });
+    const highlightedValue = computed(() => {
+      const index = highlightIndex();
+      return index === null ? null : (selectedValues().at(index) ?? null);
+    });
 
     return {
       bookmakers,
       bookmaker,
+      selectedValues,
+      highlightedValue,
       title: computed(() => matches().at(0)?.sportTitle ?? 'Zápasy'),
       rows: computed(() => {
         const key = bookmaker()?.key;
-        return filteredMatches().map((match) => ({
-          match,
-          odds: match.bookmakers.find((b) => b.key === key)?.odds ?? NO_ODDS,
-        }));
+        const lit = highlightedValue();
+
+        return filteredMatches().map((match) => {
+          const odds = oddsOf(match, key);
+          const selected = match.id === selectedMatchId();
+          const cell = (label: string, value: number | null) => ({
+            label,
+            value,
+            highlighted: selected && value !== null && value === lit,
+          });
+
+          return {
+            match,
+            selected,
+            cells: [cell('1', odds.home), cell('X', odds.draw), cell('2', odds.away)],
+          };
+        });
       }),
     };
   }),
@@ -60,7 +88,19 @@ export const MatchesStore = signalStore(
       patchState(store, { query });
     },
     setBookmaker(bookmakerKey: string): void {
-      patchState(store, { bookmakerKey });
+      patchState(store, { bookmakerKey, highlightIndex: null });
+    },
+    selectMatch(matchId: string): void {
+      const selectedMatchId = store.selectedMatchId() === matchId ? null : matchId;
+      patchState(store, { selectedMatchId, highlightIndex: null });
+    },
+    nextOdds(): void {
+      const count = store.selectedValues().length;
+      if (count === 0) {
+        return;
+      }
+      const index = store.highlightIndex();
+      patchState(store, { highlightIndex: index === null ? 0 : (index + 1) % count });
     },
     load: rxMethod<string>(
       pipe(
@@ -78,6 +118,16 @@ export const MatchesStore = signalStore(
     ),
   })),
 );
+
+function oddsOf(match: Match, bookmakerKey: string | undefined): Odds {
+  return match.bookmakers.find((b) => b.key === bookmakerKey)?.odds ?? NO_ODDS;
+}
+
+/** Available odds without duplicates, highest first: equal odds share one step of "Ďalší kurz". */
+function distinctDescending(odds: Odds): number[] {
+  const values = [odds.home, odds.draw, odds.away].filter((value) => value !== null);
+  return [...new Set(values)].sort((a, b) => b - a);
+}
 
 /** Every bookmaker that offers odds for at least one match, sorted by name. */
 function allBookmakers(matches: Match[]): Bookmaker[] {

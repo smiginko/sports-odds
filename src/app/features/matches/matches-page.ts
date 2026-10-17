@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ErrorState } from '../../shared/ui/error-state';
@@ -8,7 +8,7 @@ import { MatchesStore } from './matches.store';
 
 @Component({
   selector: 'app-matches-page',
-  imports: [RouterLink, DatePipe, LoadingState, ErrorState, OddsValue],
+  imports: [RouterLink, DatePipe, DecimalPipe, LoadingState, ErrorState, OddsValue],
   providers: [MatchesStore],
   templateUrl: './matches-page.html',
 })
