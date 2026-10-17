@@ -82,7 +82,12 @@
             </time>
 
             <div>
-              <p class="font-medium">{{ row.match.homeTeam }} – {{ row.match.awayTeam }}</p>
+              <a
+                [routerLink]="['/sports', row.match.sportKey, 'events', row.match.id]"
+                class="font-medium hover:text-emerald-700 hover:underline"
+              >
+                {{ row.match.homeTeam }} – {{ row.match.awayTeam }}
+              </a>
               <p class="text-sm text-slate-500">{{ row.match.sportTitle }}</p>
             </div>
 

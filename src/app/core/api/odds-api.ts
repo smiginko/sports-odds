@@ -8,6 +8,9 @@ import { BookmakerDto, EventDto, SportDto } from './odds-api.dto';
 // Goes through the dev-server proxy (proxy.conf.mjs), which adds the API key.
 const API_URL = '/api/v4';
 
+// European bookmakers, 1/X/2 market, decimal odds: 1 API credit per request.
+const ODDS_PARAMS = { regions: 'eu', markets: 'h2h', oddsFormat: 'decimal' };
+
 @Service()
 export class OddsApi {
   private readonly http = inject(HttpClient);
@@ -21,9 +24,17 @@ export class OddsApi {
   getMatches(sportKey: string): Observable<Match[]> {
     return this.http
       .get<EventDto[]>(`${API_URL}/sports/${encodeURIComponent(sportKey)}/odds`, {
-        params: { regions: 'eu', markets: 'h2h', oddsFormat: 'decimal' },
+        params: ODDS_PARAMS,
       })
       .pipe(map((events) => events.map(toMatch)));
+  }
+
+  getMatch(sportKey: string, eventId: string): Observable<Match> {
+    const sport = encodeURIComponent(sportKey);
+    const event = encodeURIComponent(eventId);
+    return this.http
+      .get<EventDto>(`${API_URL}/sports/${sport}/events/${event}/odds`, { params: ODDS_PARAMS })
+      .pipe(map(toMatch));
   }
 }
 

@@ -1,0 +1,71 @@
+<a
+  [routerLink]="['/sports', sportKey()]"
+  class="text-sm font-medium text-emerald-700 hover:text-emerald-800"
+>
+  ← Späť na zápasy
+</a>
+
+<div class="mt-2">
+  @switch (store.status()) {
+    @case ('loading') {
+      <app-loading-state />
+    }
+    @case ('error') {
+      <app-error-state [message]="store.error()" (retry)="store.load(params())" />
+    }
+    @case ('success') {
+      @if (store.match(); as match) {
+        <h1 class="text-2xl font-bold">{{ match.homeTeam }} – {{ match.awayTeam }}</h1>
+        <p class="mt-1 text-slate-600">
+          {{ match.sportTitle }} ·
+          <time [attr.datetime]="match.commenceTime">
+            {{ match.commenceTime | date: 'EEEE d. M. y HH:mm' }}
+          </time>
+        </p>
+
+        <div class="mt-8 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+          <table class="w-full text-left">
+            <caption class="sr-only">
+              Kurzy 1 / X / 2 podľa bookmakera, najvyšší kurz v stĺpci je zvýraznený
+            </caption>
+            <thead class="border-b border-slate-200 text-sm text-slate-500">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">Bookmaker</th>
+                <th scope="col" class="px-4 py-3 text-center font-medium">1</th>
+                <th scope="col" class="px-4 py-3 text-center font-medium">X</th>
+                <th scope="col" class="px-4 py-3 text-center font-medium">2</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of store.rows(); track row.key) {
+                <tr class="border-b border-slate-100 last:border-0">
+                  <th scope="row" class="px-4 py-2 font-medium">{{ row.title }}</th>
+                  @for (cell of row.cells; track $index) {
+                    <td
+                      class="px-4 py-2 text-center tabular-nums"
+                      [class.bg-emerald-50]="cell.best"
+                      [class.font-bold]="cell.best"
+                      [class.text-emerald-800]="cell.best"
+                    >
+                      <app-odds-value [value]="cell.value" />
+                      @if (cell.best) {
+                        <span class="sr-only">(najvyšší)</span>
+                      }
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="px-4 py-6 text-center text-slate-600">
+                    Pre tento zápas zatiaľ nie sú dostupné kurzy.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-3 text-sm text-slate-500">Najvyšší kurz v každom stĺpci je zvýraznený.</p>
+      }
+    }
+  }
+</div>

@@ -14,6 +14,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/matches/matches-page').then((m) => m.MatchesPage),
   },
   {
+    path: 'sports/:sportKey/events/:eventId',
+    title: 'Detail zápasu',
+    loadComponent: () =>
+      import('./features/match-detail/match-detail-page').then((m) => m.MatchDetailPage),
+  },
+  {
     path: 'login',
     title: 'Prihlásenie',
     loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
