@@ -14,6 +14,21 @@
           Športy
         </a>
       </li>
+      <li>
+        <a
+          routerLink="/favorites"
+          routerLinkActive
+          ariaCurrentWhenActive="page"
+          class="text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
+        >
+          Obľúbené
+          @if (favorites.count() > 0) {
+            <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
+              {{ favorites.count() }}
+            </span>
+          }
+        </a>
+      </li>
     </ul>
 
     <div class="ml-auto text-sm font-medium">

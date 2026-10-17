@@ -1,0 +1,32 @@
+<h1 class="text-2xl font-bold">Obľúbené</h1>
+<p class="mt-1 text-slate-600">Uložené zápasy ostanú aj po obnovení stránky.</p>
+
+<ul class="mt-8 space-y-3">
+  @for (match of favorites.byTime(); track match.id) {
+    <li
+      class="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:grid-cols-[9rem_1fr_auto] sm:items-center"
+    >
+      <time [attr.datetime]="match.commenceTime" class="text-sm text-slate-500">
+        {{ match.commenceTime | date: 'EEE d. M. HH:mm' }}
+      </time>
+
+      <div>
+        <a
+          [routerLink]="['/sports', match.sportKey, 'events', match.id]"
+          class="font-medium hover:text-emerald-700 hover:underline"
+        >
+          {{ match.homeTeam }} – {{ match.awayTeam }}
+        </a>
+        <p class="text-sm text-slate-500">{{ match.sportTitle }}</p>
+      </div>
+
+      <app-favorite-button [match]="match" />
+    </li>
+  } @empty {
+    <li class="rounded-lg border border-dashed border-slate-300 p-6 text-center text-slate-600">
+      Zatiaľ nemáš žiadne obľúbené zápasy. Pridáš ich hviezdičkou pri zápase v
+      <a routerLink="/sports" class="font-medium text-emerald-700 hover:underline">zozname súťaží</a
+      >.
+    </li>
+  }
+</ul>

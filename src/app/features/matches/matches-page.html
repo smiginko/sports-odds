@@ -105,15 +105,20 @@
               }
             </dl>
 
-            <button
-              type="button"
-              [attr.aria-pressed]="row.selected"
-              [attr.aria-label]="'Vybrať zápas ' + row.match.homeTeam + ' – ' + row.match.awayTeam"
-              (click)="store.selectMatch(row.match.id)"
-              class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 aria-pressed:border-emerald-700 aria-pressed:bg-emerald-700 aria-pressed:text-white"
-            >
-              Vybrať
-            </button>
+            <div class="flex items-center gap-2">
+              <app-favorite-button [match]="row.match" />
+              <button
+                type="button"
+                [attr.aria-pressed]="row.selected"
+                [attr.aria-label]="
+                  'Vybrať zápas ' + row.match.homeTeam + ' – ' + row.match.awayTeam
+                "
+                (click)="store.selectMatch(row.match.id)"
+                class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 aria-pressed:border-emerald-700 aria-pressed:bg-emerald-700 aria-pressed:text-white"
+              >
+                Vybrať
+              </button>
+            </div>
           </li>
         } @empty {
           <li class="text-slate-600">

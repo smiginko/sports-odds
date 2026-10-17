@@ -15,7 +15,10 @@
     }
     @case ('success') {
       @if (store.match(); as match) {
-        <h1 class="text-2xl font-bold">{{ match.homeTeam }} – {{ match.awayTeam }}</h1>
+        <div class="flex items-start justify-between gap-4">
+          <h1 class="text-2xl font-bold">{{ match.homeTeam }} – {{ match.awayTeam }}</h1>
+          <app-favorite-button [match]="match" />
+        </div>
         <p class="mt-1 text-slate-600">
           {{ match.sportTitle }} ·
           <time [attr.datetime]="match.commenceTime">

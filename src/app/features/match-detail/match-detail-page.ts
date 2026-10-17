@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { ErrorState } from '../../shared/ui/error-state';
 import { LoadingState } from '../../shared/ui/loading-state';
 import { OddsValue } from '../../shared/ui/odds-value';
+import { FavoriteButton } from '../favorites/favorite-button';
 import { MatchDetailStore } from './match-detail.store';
 
 @Component({
   selector: 'app-match-detail-page',
-  imports: [RouterLink, DatePipe, LoadingState, ErrorState, OddsValue],
+  imports: [RouterLink, DatePipe, LoadingState, ErrorState, OddsValue, FavoriteButton],
   providers: [MatchDetailStore],
   templateUrl: './match-detail-page.html',
 })

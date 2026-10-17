@@ -20,6 +20,11 @@ export const routes: Routes = [
       import('./features/match-detail/match-detail-page').then((m) => m.MatchDetailPage),
   },
   {
+    path: 'favorites',
+    title: 'Obľúbené',
+    loadComponent: () => import('./features/favorites/favorites-page').then((m) => m.FavoritesPage),
+  },
+  {
     path: 'login',
     title: 'Prihlásenie',
     loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
