@@ -1,3 +1,190 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+/*
+ * Oddline design tokens. Every variable becomes Tailwind classes:
+ * --color-volt → bg-volt, text-volt, border-volt…   --text-title → text-title
+ * --font-mono → font-mono   --radius-md → rounded-md   --shadow-glow → shadow-glow
+ */
+@theme {
+  /* Only the design's colours; the default palette (slate, emerald…) is switched off. */
+  --color-*: initial;
+
+  /* Layers, from the darkest */
+  --color-bg: #0b0d10;
+  --color-surface: #12161c;
+  --color-surface-raised: #191e26;
+  --color-surface-hover: #212833;
+  --color-border: #2a313d;
+  --color-border-control: #64728a;
+
+  /* Text */
+  --color-ink: #f2f5f7;
+  --color-ink-muted: #a6b0bd;
+  --color-ink-subtle: #8390a1;
+
+  /* Brand (volt) and accents: cyan = links, focus, selection; ember = favourites, demo */
+  --color-volt: #d4ff3a;
+  --color-volt-hover: #e3ff7a;
+  --color-volt-soft: #374229;
+  --color-on-volt: #0b0d10;
+  --color-cyan: #3ddcff;
+  --color-cyan-soft: #1c3a45;
+  --color-ember: #ff7a2f;
+  --color-ember-soft: #3b2a24;
+
+  /* Odds went up / down; fall also marks errors */
+  --color-rise: #3ee68a;
+  --color-rise-soft: #1f3e36;
+  --color-fall: #ff5c77;
+  --color-fall-soft: #3e2833;
+
+  /* Fonts: Unbounded for headings, Onest for text, JetBrains Mono for numbers */
+  --font-display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Type scale: size, line height and, where the design says so, spacing and weight */
+  --text-display-xl: 48px;
+  --text-display-xl--line-height: 52px;
+  --text-display-xl--letter-spacing: -0.02em;
+  --text-display-xl--font-weight: 700;
+  --text-display: 32px;
+  --text-display--line-height: 38px;
+  --text-display--letter-spacing: -0.015em;
+  --text-display--font-weight: 700;
+  --text-title: 20px;
+  --text-title--line-height: 26px;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 600;
+  --text-body-lg: 17px;
+  --text-body-lg--line-height: 26px;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-label: 13px;
+  --text-label--line-height: 18px;
+  --text-label--font-weight: 500;
+  --text-eyebrow: 12px;
+  --text-eyebrow--line-height: 16px;
+  --text-eyebrow--letter-spacing: 0.08em;
+  --text-eyebrow--font-weight: 600;
+  --text-odds-lg: 24px;
+  --text-odds-lg--line-height: 28px;
+  --text-odds-lg--font-weight: 700;
+  --text-odds: 15px;
+  --text-odds--line-height: 20px;
+  --text-odds--font-weight: 700;
+  --text-meta: 13px;
+  --text-meta--line-height: 18px;
+  --text-meta--font-weight: 500;
+
+  /* Corners: sm = odds cells and badges, md = buttons, inputs and rows, lg = cards */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* The only shadow: hover on a sport tile and the primary button */
+  --shadow-glow: 0 0 0 1px rgb(212 255 58 / 0.45), 0 0 24px rgb(212 255 58 / 0.18);
+
+  /* Loading placeholders */
+  --animate-shimmer: shimmer 1.4s linear infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+/* Self-hosted fonts from public/fonts (latin + latin-ext, so ľ š č ť ž ô work) */
+@font-face {
+  font-family: 'Unbounded';
+  src: url('/fonts/Unbounded-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Unbounded';
+  src: url('/fonts/Unbounded-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/Onest-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/Onest-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/Onest-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@layer base {
+  /* Dark scrollbars, select menus and other native controls */
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-bg text-body text-ink antialiased;
+  }
+
+  /* One focus ring for every link, button and input */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-cyan;
+  }
+}
+
+/*
+ * Reusable pieces for native elements (a component around <button> or <input> would only get
+ * in the way of forms and accessibility). Base and variant never set the same property,
+ * so their order in the CSS does not matter.
+ */
+@utility btn {
+  @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 font-semibold transition-colors duration-120 disabled:cursor-not-allowed disabled:opacity-45;
+}
+
+/* The main action, one per page */
+@utility btn-primary {
+  @apply border-transparent bg-volt text-on-volt hover:bg-volt-hover hover:shadow-glow disabled:shadow-none;
+}
+
+@utility btn-secondary {
+  @apply border-border-control text-ink hover:border-ink-muted hover:bg-surface-hover;
+}
+
+@utility btn-ghost {
+  @apply border-transparent text-ink-muted hover:bg-surface-hover hover:text-ink;
+}
+
+/* Text input and select */
+@utility field {
+  @apply h-10 w-full rounded-md border border-border-control bg-surface px-3 text-ink placeholder:text-ink-subtle hover:border-ink-muted aria-[invalid=true]:border-fall;
+}
+
+@utility card {
+  @apply rounded-lg border border-border bg-surface;
+}
