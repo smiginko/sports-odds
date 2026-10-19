@@ -10,10 +10,11 @@ import {
 } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
+import { Logo } from '../../shared/ui/logo';
 
 @Component({
   selector: 'app-login-page',
-  imports: [FormRoot, FormField],
+  imports: [FormRoot, FormField, Logo],
   templateUrl: './login-page.html',
 })
 export class LoginPage {

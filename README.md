@@ -1,6 +1,6 @@
-# Športové kurzy
+# Oddline · Športové kurzy
 
-Angular aplikácia, ktorá zobrazuje športové súťaže, zápasy a kurzy 1 / X / 2 z [The Odds API v4](https://the-odds-api.com/liveapi/guides/v4/).
+Angular aplikácia, ktorá zobrazuje športové súťaže, zápasy a kurzy 1 / X / 2 z [The Odds API v4](https://the-odds-api.com/liveapi/guides/v4/). Má vlastný tmavý dizajn Oddline, popis je v časti [Dizajn](#dizajn).
 
 **Technológie:** Angular 22 (standalone komponenty, zoneless, signály, OnPush), NgRx Signal Store, Angular CDK (virtual scroll), Tailwind CSS 4, RxJS, TypeScript 6.
 
@@ -81,22 +81,25 @@ HTTP sa v testoch nahrádza cez `HttpTestingController`, `OddsApi` v teste store
 | Základ                    | Hotovo | Stránky Športy, Zápasy, Prihlásenie, Klient; načítavanie, prázdny výsledok a chyba s tlačidlom Skúsiť znova                                       |
 | A – Interakcie            | Hotovo | Detail zápasu so zvýraznením najvyššieho kurzu, Obľúbené, vyhľadávanie podľa tímu, výber bookmakera, tlačidlo Ďalší kurz                          |
 | B – Väčší dataset a stav  | Hotovo | Virtual scroll (CDK), demo režim s 1 000 zápasmi, stav dát, požiadaviek, filtrov a obľúbených v NgRx Signal Store, ochrana pred staršou odpoveďou |
-| C – Live update kurzov    | Hotovo | Služba každé 2 s zmení 20 náhodných kurzov (1,00 – 5,00), zmena blikne na zeleno alebo na červeno                                                 |
+| C – Live update kurzov    | Hotovo | Služba každé 2 s zmení 20 náhodných kurzov (1,00 – 5,00), zmena blikne na zeleno alebo na červeno so šípkou ▲/▼                                   |
 | D – Technické rozhodnutia | Hotovo | Návrh v časti [Rozšírenie D](#rozšírenie-d-technické-rozhodnutia)                                                                                 |
 | Voliteľný tooling         | Hotovo | ESLint, 11 unit testov (Vitest) a pravidlá pre AI agenta v [`AGENTS.md`](AGENTS.md)                                                               |
+| Dizajn                    | Hotovo | Tmavý dizajn Oddline: tokeny v Tailwinde, vlastné písma, hlavička, pätička, mobilná lišta, všetky stránky                                         |
 
 ## Architektúra
 
 ```
 src/app/
+  layout/         rám okolo každej stránky: Header, Footer, TabBar (mobil)
   core/
     api/          OddsApi: HTTP volania a prevod DTO z API na modely, chybové hlášky
     auth/         AuthStore (prihlásený email) a authGuard
     favorites/    FavoritesStore (obľúbené zápasy v localStorage)
     models/       Sport, Match, Odds, RequestStatus
-  shared/ui/      prezentačné komponenty: LoadingState, ErrorState, OddsValue
+  shared/ui/      prezentačné komponenty: Logo, LoadingState, ErrorState, EmptyState, OddsValue
   features/       jedna stránka = komponent + jej store
     sports/  matches/  match-detail/  favorites/  auth/
+src/styles.css    dizajnové tokeny (@theme), písma, základné štýly, @utility
 ```
 
 Dáta tečú jedným smerom: **stránka → store (NgRx Signal Store) → `OddsApi` → `/api` proxy → The Odds API**. Komponenty iba zobrazujú a posielajú akcie, stav mení iba store cez `patchState`.
@@ -108,8 +111,18 @@ Hlavné rozhodnutia:
 - **DTO → model.** Odpovede API sa hneď v `core/api` prevedú na modely aplikácie; chýbajúci kurz je `null` a zobrazí sa ako pomlčka.
 - **Zoneless, OnPush, signály, `@if` / `@for`.** OnPush je v Angulari 22 predvolený, preto nie je nastavený v jednotlivých komponentoch. Jediná výnimka zo syntaxe `@for` je `*cdkVirtualFor`, ktorý nemá variant s `@for`.
 - **Prihlásenie cez Signal Forms** (stabilné v Angulari 22). Do localStorage sa ukladá iba email, stránku `/client` chráni funkcionálny guard.
-- **Virtual scroll** s pevnou výškou riadku (stabilná stratégia CDK). Z 1 000+ zápasov je v DOM-e naraz len okolo desiatich riadkov.
-- **Bliknutie kurzov** cez `effect` a Web Animations API. Kľúč zápas:bookmaker:výsledok zabráni falošnému bliknutiu pri recyklácii riadkov a pri zmene bookmakera; rešpektuje sa `prefers-reduced-motion`.
+- **Virtual scroll** s pevnou výškou riadku (stabilná stratégia CDK): 80 px na desktope, 160 px na mobile, prepína ju `BreakpointObserver` pri tom istom breakpointe ako Tailwind. Z 1 000+ zápasov je v DOM-e naraz len okolo desiatich riadkov.
+- **Bliknutie kurzov** cez `effect` a Web Animations API, farba aj šípka ▲/▼. Kľúč zápas:bookmaker:výsledok zabráni falošnému bliknutiu pri recyklácii riadkov a pri zmene bookmakera; rešpektuje sa `prefers-reduced-motion`.
+
+## Dizajn
+
+Vizuálna identita **Oddline** podľa vlastného návrhu: tmavé rozhranie, jedna farba značky (volt) a kurzy v písme s rovnako širokými číslicami, aby sa pri zmene neposúvali.
+
+- **Tokeny v CSS.** Farby, písma, veľkosti písma, rohy a žiara sú v bloku `@theme` v [`src/styles.css`](src/styles.css). Tailwind z nich robí triedy ako `bg-surface` alebo `text-volt`. Predvolená paleta Tailwindu je vypnutá, takže sa dajú použiť iba farby z návrhu.
+- **Opakované kúsky** (`btn`, `btn-primary`, `btn-secondary`, `btn-ghost`, `field`, `card`) sú `@utility` v tom istom súbore. Tlačidlá a polia ostali natívne `<button>` a `<input>`.
+- **Písma** Unbounded, Onest a JetBrains Mono sú v `public/fonts` (licencia SIL Open Font License 1.1), bez požiadavky na Google Fonts.
+- **Mobil:** pod 640 px sa navigácia presunie do spodnej lišty a pod 768 px sa riadok zápasu skladá pod seba.
+- **Prístupnosť:** kontrast textu aspoň 4,5 : 1, jeden viditeľný rámik fokusu, zmena kurzu má okrem farby aj šípku a pri `prefers-reduced-motion` sa vypne bliknutie aj animácia načítavania.
 
 ## Rozšírenie D: technické rozhodnutia
 
@@ -152,6 +165,7 @@ V aplikácii je live update z rozšírenia C **simulovaný** (`OddsTicker`), aby
 - Vyhľadávanie nerozlišuje veľké a malé písmená, ale rozlišuje diakritiku.
 - Odpovede API sa necachujú, každé otvorenie zoznamu zápasov alebo detailu stojí kredit.
 - Unit testy pokrývajú iba najdôležitejšiu logiku; bliknutie, virtual scroll a šablóny testované nie sú.
+- Z návrhu dizajnu chýba vyhľadávanie súťaží, odznak „live“ a kontrolný zoznam pravidiel hesla. Boli by to nové funkcie mimo zadania.
 
 ## Čo by som riešil ďalej
 
@@ -160,3 +174,4 @@ V aplikácii je live update z rozšírenia C **simulovaný** (`OddsTicker`), aby
 - Pozastavenie live update v skrytej karte.
 - Vyhľadávanie bez ohľadu na diakritiku a samostatné hlášky pre prekročenie limitu (429) a výpadok pripojenia.
 - End-to-end test hlavného toku (napríklad Playwright).
+- Po odobratí zápasu na stránke Obľúbené presunúť fokus na ďalší riadok; teraz zmizne spolu s riadkom.
