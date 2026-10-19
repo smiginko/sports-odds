@@ -85,13 +85,15 @@
       }
 
       @if (store.rows().length === 0) {
-        <p class="rounded-lg border border-dashed border-slate-300 p-6 text-center text-slate-600">
-          @if (store.matches().length > 0) {
-            Žiadny zápas nezodpovedá hľadaniu „{{ store.query() }}“.
-          } @else {
-            Pre túto súťaž momentálne nie sú vypísané žiadne zápasy.
-          }
-        </p>
+        @if (store.matches().length > 0) {
+          <app-empty-state heading="Žiadne zápasy pre „{{ store.query() }}“">
+            <p>Skús iný názov tímu alebo vymaž vyhľadávanie.</p>
+          </app-empty-state>
+        } @else {
+          <app-empty-state heading="Žiadne zápasy">
+            <p>Pre túto súťaž momentálne nie sú vypísané žiadne zápasy.</p>
+          </app-empty-state>
+        }
       } @else {
         <cdk-virtual-scroll-viewport scrollWindow [itemSize]="rowHeight">
           <app-match-row

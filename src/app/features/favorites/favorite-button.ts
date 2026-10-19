@@ -10,21 +10,18 @@ import { FavoriteMatch, FavoritesStore } from '../../core/favorites/favorites.st
       [attr.aria-label]="'Obľúbený zápas ' + match().homeTeam + ' – ' + match().awayTeam"
       [title]="isFavorite() ? 'Odobrať z obľúbených' : 'Pridať do obľúbených'"
       (click)="favorites.toggle(match())"
-      class="rounded-md p-1.5 text-slate-400 hover:text-amber-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 aria-pressed:text-amber-500"
+      class="grid size-9 cursor-pointer place-items-center rounded-md text-ink-subtle transition-colors duration-120 hover:bg-surface-hover hover:text-ink aria-pressed:text-ember"
     >
       <svg
         viewBox="0 0 24 24"
         stroke="currentColor"
-        stroke-width="1.5"
-        class="size-6"
+        stroke-width="2"
+        stroke-linejoin="round"
         aria-hidden="true"
+        class="size-5"
         [attr.fill]="isFavorite() ? 'currentColor' : 'none'"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-        />
+        <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" />
       </svg>
     </button>
   `,

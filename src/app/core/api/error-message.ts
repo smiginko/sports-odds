@@ -7,5 +7,5 @@ export function errorMessage(error: unknown): string {
   if (error instanceof HttpErrorResponse && error.status === 404) {
     return 'Zápas alebo súťaž sa nenašli. Zápas už mohol skončiť.';
   }
-  return 'Dáta sa nepodarilo načítať.';
+  return 'Server neodpovedá alebo si offline. Skús to o chvíľu znova.';
 }

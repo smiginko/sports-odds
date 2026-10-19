@@ -1,9 +1,12 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, effect, ElementRef, inject, input } from '@angular/core';
+import { Component, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 
-const FLASH_UP = '#a7f3d0'; // Tailwind emerald-200
-const FLASH_DOWN = '#fecaca'; // Tailwind red-200
-const FLASH_MS = 800;
+// Same values as the tokens --color-rise-soft and --color-fall-soft in styles.css.
+const FLASH_UP = '#1f3e36';
+const FLASH_DOWN = '#3e2833';
+const FLASH_MS = 900;
+
+type Trend = 'up' | 'down';
 
 @Component({
   selector: 'app-odds-value',
@@ -12,16 +15,34 @@ const FLASH_MS = 800;
     @if (value() !== null) {
       {{ value() | number: '1.2-2' }}
     } @else {
-      –
+      <span class="text-ink-subtle">–</span>
+      <span class="sr-only">kurz nie je k dispozícii</span>
+    }
+    @if (key() !== null) {
+      <!-- Colour is never alone: the arrow tells up from down. Invisible until a flash. -->
+      <span
+        #arrow
+        aria-hidden="true"
+        class="text-[10px] opacity-0"
+        [class.text-rise]="trend() === 'up'"
+        [class.text-fall]="trend() === 'down'"
+      >
+        {{ trend() === 'up' ? '▲' : '▼' }}
+      </span>
     }
   `,
-  host: { class: 'block rounded' },
+  host: {
+    class:
+      'inline-flex items-center justify-center gap-1 rounded-sm font-mono text-odds tabular-nums',
+  },
 })
 export class OddsValue {
   readonly value = input.required<number | null>();
   /** Identity of these odds (match, bookmaker, outcome); without it the value never flashes. */
   readonly key = input<string | null>(null);
 
+  protected readonly trend = signal<Trend>('up');
+  private readonly arrow = viewChild<ElementRef<HTMLElement>>('arrow');
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private previous: { key: string | null; value: number | null } | null = null;
 
@@ -39,18 +60,23 @@ export class OddsValue {
         return;
       }
       if (value !== previous.value) {
-        this.flash(value > previous.value ? FLASH_UP : FLASH_DOWN);
+        this.flash(value > previous.value ? 'up' : 'down');
       }
     });
   }
 
-  private flash(color: string): void {
+  private flash(trend: Trend): void {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
-    this.element.animate([{ backgroundColor: color }, { backgroundColor: 'transparent' }], {
-      duration: FLASH_MS,
-      easing: 'ease-out',
-    });
+    this.trend.set(trend);
+    // Fade back to the cell's own background, whatever the parent gave it.
+    const resting = getComputedStyle(this.element).backgroundColor;
+    const timing = { duration: FLASH_MS, easing: 'ease-out' };
+    this.element.animate(
+      [{ backgroundColor: trend === 'up' ? FLASH_UP : FLASH_DOWN }, { backgroundColor: resting }],
+      timing,
+    );
+    this.arrow()?.nativeElement.animate([{ opacity: 1 }, { opacity: 0 }], timing);
   }
 }

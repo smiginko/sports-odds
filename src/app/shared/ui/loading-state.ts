@@ -3,11 +3,15 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-loading-state',
   template: `
-    <div role="status" class="space-y-3">
+    <div role="status">
       <span class="sr-only">Načítavam…</span>
-      @for (row of rows; track $index) {
-        <div class="h-16 animate-pulse rounded-lg bg-slate-200"></div>
-      }
+      <div aria-hidden="true" class="space-y-2">
+        @for (row of rows; track $index) {
+          <div
+            class="h-18 animate-shimmer rounded-md bg-linear-to-r from-surface-raised via-surface-hover to-surface-raised bg-size-[200%_100%] motion-reduce:animate-none"
+          ></div>
+        }
+      </div>
     </div>
   `,
 })

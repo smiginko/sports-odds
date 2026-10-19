@@ -28,7 +28,9 @@
           </ul>
         </section>
       } @empty {
-        <p class="text-slate-600">Momentálne nie sú dostupné žiadne súťaže.</p>
+        <app-empty-state heading="Žiadne súťaže">
+          <p>The Odds API momentálne neponúka žiadnu súťaž.</p>
+        </app-empty-state>
       }
     }
   }

@@ -7,6 +7,7 @@ import {
 import { DecimalPipe } from '@angular/common';
 import { booleanAttribute, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { EmptyState } from '../../shared/ui/empty-state';
 import { ErrorState } from '../../shared/ui/error-state';
 import { LoadingState } from '../../shared/ui/loading-state';
 import { DEMO_MATCH_COUNT } from './demo-matches';
@@ -20,6 +21,7 @@ import { MatchesStore, MatchRowData } from './matches.store';
     DecimalPipe,
     LoadingState,
     ErrorState,
+    EmptyState,
     MatchRow,
     CdkVirtualScrollViewport,
     CdkFixedSizeVirtualScroll,
