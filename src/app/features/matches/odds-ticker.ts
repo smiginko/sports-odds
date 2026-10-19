@@ -3,7 +3,7 @@ import { interval, map, Observable } from 'rxjs';
 import { Match, Odds } from '../../core/models/match';
 import { randomPrice } from './demo-matches';
 
-const TICK_MS = 2000;
+export const TICK_MS = 2000;
 const CHANGES_PER_TICK = 20;
 const OUTCOMES: (keyof Odds)[] = ['home', 'draw', 'away'];
 
