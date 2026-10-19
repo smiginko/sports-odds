@@ -19,26 +19,49 @@ const initialState: MatchDetailState = {
   error: '',
 };
 
+/** The highest price for one outcome and the bookmaker that offers it. */
+interface BestPrice {
+  value: number;
+  bookmaker: string;
+}
+
 export const MatchDetailStore = signalStore(
   withState(initialState),
-  withComputed(({ match }) => ({
-    rows: computed(() => {
-      const bookmakers = [...(match()?.bookmakers ?? [])].sort((a, b) =>
-        a.title.localeCompare(b.title),
-      );
-      const best = bestOdds(bookmakers);
-      const cell = (value: number | null, bestValue: number | null) => ({
-        value,
-        best: value !== null && value === bestValue,
-      });
+  withComputed(({ match }) => {
+    const bookmakers = computed(() =>
+      [...(match()?.bookmakers ?? [])].sort((a, b) => a.title.localeCompare(b.title)),
+    );
+    const best = computed(() => bestOdds(bookmakers()));
 
-      return bookmakers.map(({ key, title, odds }) => ({
-        key,
-        title,
-        cells: [cell(odds.home, best.home), cell(odds.draw, best.draw), cell(odds.away, best.away)],
-      }));
-    }),
-  })),
+    return {
+      rows: computed(() => {
+        const cell = (value: number | null, bestPrice: BestPrice | null) => ({
+          value,
+          best: value !== null && value === bestPrice?.value,
+        });
+        const { home, draw, away } = best();
+
+        return bookmakers().map(({ key, title, odds }) => ({
+          key,
+          title,
+          cells: [cell(odds.home, home), cell(odds.draw, draw), cell(odds.away, away)],
+        }));
+      }),
+      /** The three "best odds" cards above the table. */
+      bestCards: computed(() => {
+        const current = match();
+        if (!current) {
+          return [];
+        }
+        const { home, draw, away } = best();
+        return [
+          { label: `1 · ${current.homeTeam}`, price: home },
+          { label: 'X · Remíza', price: draw },
+          { label: `2 · ${current.awayTeam}`, price: away },
+        ];
+      }),
+    };
+  }),
   withMethods((store, api = inject(OddsApi)) => ({
     load: rxMethod<{ sportKey: string; eventId: string }>(
       pipe(
@@ -57,16 +80,21 @@ export const MatchDetailStore = signalStore(
   })),
 );
 
-/** The highest offered odds for 1, X and 2 across all bookmakers. */
-function bestOdds(bookmakers: BookmakerOdds[]): Odds {
-  const highest = (values: (number | null)[]) => {
-    const offered = values.filter((value) => value !== null);
-    return offered.length > 0 ? Math.max(...offered) : null;
+/**
+ * The highest offered price for 1, X and 2 across all bookmakers, `null` when nobody offers it.
+ * On a tie the first bookmaker in the list wins (only `>` replaces the current best).
+ */
+function bestOdds(bookmakers: BookmakerOdds[]): Record<keyof Odds, BestPrice | null> {
+  const highest = (outcome: keyof Odds) => {
+    let best: BestPrice | null = null;
+    for (const { title, odds } of bookmakers) {
+      const value = odds[outcome];
+      if (value !== null && (best === null || value > best.value)) {
+        best = { value, bookmaker: title };
+      }
+    }
+    return best;
   };
 
-  return {
-    home: highest(bookmakers.map((b) => b.odds.home)),
-    draw: highest(bookmakers.map((b) => b.odds.draw)),
-    away: highest(bookmakers.map((b) => b.odds.away)),
-  };
+  return { home: highest('home'), draw: highest('draw'), away: highest('away') };
 }
