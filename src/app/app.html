@@ -1,60 +1,8 @@
-<header class="border-b border-slate-200 bg-white">
-  <nav class="mx-auto flex max-w-5xl items-center gap-8 px-4 py-4" aria-label="Hlavná navigácia">
-    <a routerLink="/" class="text-lg font-bold tracking-tight">
-      Športové <span class="text-emerald-600">kurzy</span>
-    </a>
-    <ul class="flex gap-6 text-sm font-medium">
-      <li>
-        <a
-          routerLink="/sports"
-          routerLinkActive
-          ariaCurrentWhenActive="page"
-          class="text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
-        >
-          Športy
-        </a>
-      </li>
-      <li>
-        <a
-          routerLink="/favorites"
-          routerLinkActive
-          ariaCurrentWhenActive="page"
-          class="text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
-        >
-          Obľúbené
-          @if (favorites.count() > 0) {
-            <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
-              {{ favorites.count() }}
-            </span>
-          }
-        </a>
-      </li>
-    </ul>
+<app-header />
 
-    <div class="ml-auto text-sm font-medium">
-      @if (auth.email(); as email) {
-        <a
-          routerLink="/client"
-          routerLinkActive
-          ariaCurrentWhenActive="page"
-          class="block max-w-48 truncate text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
-        >
-          {{ email }}
-        </a>
-      } @else {
-        <a
-          routerLink="/login"
-          routerLinkActive
-          ariaCurrentWhenActive="page"
-          class="text-slate-600 hover:text-slate-900 aria-[current=page]:text-emerald-700"
-        >
-          Prihlásiť sa
-        </a>
-      }
-    </div>
-  </nav>
-</header>
-
-<main class="mx-auto max-w-5xl px-4 py-8">
+<main class="mx-auto w-full max-w-240 flex-1 px-4 pt-6 pb-12 sm:px-6 sm:pt-8">
   <router-outlet />
 </main>
+
+<app-footer />
+<app-tab-bar />

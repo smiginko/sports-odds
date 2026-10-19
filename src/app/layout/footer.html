@@ -1,0 +1,74 @@
+<footer class="border-t border-border text-ink-muted">
+  <div class="mx-auto max-w-240 px-4 pt-12 pb-6 sm:px-6">
+    <div class="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div>
+        <app-logo class="text-lg" />
+        <p class="mt-3 max-w-[34ch] text-sm">
+          Kurzy 1 · X · 2 európskych bookmakerov na jednom mieste. Ukážková aplikácia v Angulari 22
+          so stavom v NgRx Signal Store.
+        </p>
+        <ul aria-label="Technológie" class="mt-3 flex flex-wrap gap-1.5">
+          @for (technology of technologies; track technology) {
+            <li
+              class="flex h-6 items-center rounded-full border border-border px-2.5 font-mono text-xs"
+            >
+              {{ technology }}
+            </li>
+          }
+        </ul>
+      </div>
+
+      <nav aria-label="Aplikácia">
+        <h2 class="mb-3 text-eyebrow text-ink uppercase">Aplikácia</h2>
+        <ul class="flex flex-col gap-2 text-sm">
+          <li><a routerLink="/sports" class="hover:text-cyan hover:underline">Športy</a></li>
+          <li><a routerLink="/favorites" class="hover:text-cyan hover:underline">Obľúbené</a></li>
+          <li>
+            <a routerLink="/client" class="hover:text-cyan hover:underline">Klientska zóna</a>
+          </li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Projekt">
+        <h2 class="mb-3 text-eyebrow text-ink uppercase">Projekt</h2>
+        <ul class="flex flex-col gap-2 text-sm">
+          <li>
+            <a
+              href="https://github.com/smiginko/sports-odds"
+              class="hover:text-cyan hover:underline"
+            >
+              Zdrojový kód na GitHube
+            </a>
+          </li>
+          <li>
+            <a href="https://the-odds-api.com" class="hover:text-cyan hover:underline">
+              Dáta: The Odds API v4
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://github.com/smiginko/sports-odds#readme"
+              class="hover:text-cyan hover:underline"
+            >
+              Ako to vzniklo (README)
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div
+      class="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-label font-normal text-ink-subtle"
+    >
+      <p class="flex items-center gap-2">
+        <span
+          class="grid size-[26px] shrink-0 place-items-center rounded-full border-[1.5px] border-ink-muted text-[10px] font-bold text-ink-muted"
+        >
+          18+
+        </span>
+        Len informatívne kurzy, nie stávková služba. Hraj zodpovedne.
+      </p>
+      <p>© 2026 Stanislav Žiačik · zadanie na pohovor</p>
+    </div>
+  </div>
+</footer>

@@ -143,9 +143,13 @@
 }
 
 @layer base {
-  /* Dark scrollbars, select menus and other native controls */
+  /*
+   * Dark scrollbars, select menus and other native controls. The scroll padding keeps a focused
+   * element from hiding under the sticky header or the phone tab bar (both 64 px).
+   */
   html {
     color-scheme: dark;
+    scroll-padding-block: 4rem;
   }
 
   body {

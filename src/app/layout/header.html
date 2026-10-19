@@ -1,0 +1,54 @@
+<header
+  class="flex h-14 items-center justify-between gap-6 border-b border-border bg-bg px-4 sm:h-16 sm:px-6"
+>
+  <app-logo class="text-xl" />
+
+  <!-- On phones the navigation moves to the bottom tab bar. -->
+  <nav aria-label="Hlavná navigácia" class="hidden self-stretch sm:flex">
+    <a
+      routerLink="/sports"
+      routerLinkActive
+      ariaCurrentWhenActive="page"
+      class="relative inline-flex items-center px-3 font-semibold text-ink-muted transition-colors duration-120 after:absolute after:inset-x-3 after:-bottom-px after:h-[3px] after:rounded-t-[3px] after:bg-volt after:opacity-0 hover:text-ink aria-[current=page]:text-ink aria-[current=page]:after:opacity-100"
+    >
+      Športy
+    </a>
+    <a
+      routerLink="/favorites"
+      routerLinkActive
+      ariaCurrentWhenActive="page"
+      class="relative inline-flex items-center gap-2 px-3 font-semibold text-ink-muted transition-colors duration-120 after:absolute after:inset-x-3 after:-bottom-px after:h-[3px] after:rounded-t-[3px] after:bg-volt after:opacity-0 hover:text-ink aria-[current=page]:text-ink aria-[current=page]:after:opacity-100"
+    >
+      Obľúbené
+      @if (favorites.count() > 0) {
+        <span
+          class="grid h-5 min-w-5 place-items-center rounded-full bg-volt px-1.5 font-mono text-xs font-bold text-on-volt"
+        >
+          {{ favorites.count() }}
+        </span>
+      }
+    </a>
+  </nav>
+
+  @if (auth.email(); as email) {
+    <a
+      routerLink="/client"
+      routerLinkActive
+      ariaCurrentWhenActive="page"
+      [attr.aria-label]="'Klientska zóna: ' + email"
+      class="inline-flex h-8 items-center gap-2 rounded-full border border-border bg-surface-raised p-1 text-label text-ink hover:bg-surface-hover sm:pr-3"
+    >
+      <span
+        aria-hidden="true"
+        class="grid size-[22px] shrink-0 place-items-center rounded-full bg-cyan text-[11px] font-bold text-bg uppercase"
+      >
+        {{ email[0] }}
+      </span>
+      <span class="hidden max-w-48 truncate sm:block">{{ email }}</span>
+    </a>
+  } @else {
+    <a routerLink="/login" routerLinkActive ariaCurrentWhenActive="page" class="btn btn-secondary">
+      Prihlásiť sa
+    </a>
+  }
+</header>
