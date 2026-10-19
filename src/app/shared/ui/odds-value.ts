@@ -12,6 +12,9 @@ type Trend = 'up' | 'down';
   selector: 'app-odds-value',
   imports: [DecimalPipe],
   template: `
+    @if (label(); as label) {
+      <span class="text-[11px] font-medium text-ink-muted">{{ label }}</span>
+    }
     @if (value() !== null) {
       {{ value() | number: '1.2-2' }}
     } @else {
@@ -40,6 +43,8 @@ export class OddsValue {
   readonly value = input.required<number | null>();
   /** Identity of these odds (match, bookmaker, outcome); without it the value never flashes. */
   readonly key = input<string | null>(null);
+  /** Outcome shown small before the number (1, X or 2). */
+  readonly label = input<string | null>(null);
 
   protected readonly trend = signal<Trend>('up');
   private readonly arrow = viewChild<ElementRef<HTMLElement>>('arrow');

@@ -1,40 +1,60 @@
-<a routerLink="/sports" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">
+<a
+  routerLink="/sports"
+  class="text-label text-ink-muted transition-colors duration-120 hover:text-cyan"
+>
   ← Všetky športy
 </a>
 
-<div class="mt-2 flex flex-wrap items-baseline justify-between gap-2">
-  <h1 class="text-2xl font-bold">{{ store.title() }}</h1>
-  <a
-    [routerLink]="[]"
-    [queryParams]="{ demo: demo() ? null : true }"
-    class="text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline"
-  >
+<div class="mt-4 mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <p class="text-eyebrow text-volt uppercase">Zápasy a kurzy 1 · X · 2</p>
+    <h1 class="mt-1 font-display text-display">{{ store.title() }}</h1>
+  </div>
+  <div class="flex items-center gap-2">
     @if (demo()) {
-      Vypnúť demo dáta
-    } @else {
-      Zapnúť demo dáta (+{{ demoCount | number }} zápasov)
+      <span class="rounded-sm bg-ember px-2 py-0.5 text-eyebrow text-on-ember uppercase">
+        Demo
+      </span>
     }
-  </a>
+    <a [routerLink]="[]" [queryParams]="{ demo: demo() ? null : true }" class="btn btn-ghost">
+      @if (demo()) {
+        Vypnúť demo dáta
+      } @else {
+        Zapnúť demo dáta (+{{ demoCount | number }} zápasov)
+      }
+    </a>
+  </div>
 </div>
-@if (store.bookmaker(); as bookmaker) {
-  <p class="mt-1 text-slate-600">
-    Kurzy 1 / X / 2 od bookmakera <strong>{{ bookmaker.title }}</strong>
-  </p>
-}
 
-<div class="mt-8">
-  @switch (store.status()) {
-    @case ('loading') {
-      <app-loading-state />
-    }
-    @case ('error') {
-      <app-error-state [message]="store.error()" (retry)="store.load(params())" />
-    }
-    @case ('success') {
-      @if (store.matches().length > 0) {
-        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div class="flex-1">
-            <label for="search" class="block text-sm font-medium">Hľadať tím</label>
+@switch (store.status()) {
+  @case ('loading') {
+    <app-loading-state />
+  }
+  @case ('error') {
+    <app-error-state [message]="store.error()" (retry)="store.load(params())" />
+  }
+  @case ('success') {
+    @if (store.matches().length === 0) {
+      <app-empty-state heading="Žiadne zápasy">
+        <p>Pre túto súťaž momentálne nie sú vypísané žiadne zápasy.</p>
+      </app-empty-state>
+    } @else {
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="flex-1">
+          <label for="search" class="block text-label text-ink-muted">Hľadať tím</label>
+          <div class="relative mt-1.5">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              aria-hidden="true"
+              class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-subtle"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
             <input
               #search
               id="search"
@@ -42,60 +62,56 @@
               placeholder="napr. Arsenal"
               [value]="store.query()"
               (input)="store.setQuery(search.value)"
-              class="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus:outline-2 focus:outline-emerald-600"
+              class="field pl-10"
             />
           </div>
-          <div>
-            <label for="bookmaker" class="block text-sm font-medium">Bookmaker</label>
-            <select
-              #select
-              id="bookmaker"
-              (change)="store.setBookmaker(select.value)"
-              class="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 focus:outline-2 focus:outline-emerald-600 sm:w-56"
-            >
-              @for (bookmaker of store.bookmakers(); track bookmaker.key) {
-                <option
-                  [value]="bookmaker.key"
-                  [selected]="bookmaker.key === store.bookmaker()?.key"
-                >
-                  {{ bookmaker.title }}
-                </option>
-              }
-            </select>
-          </div>
-          <button
-            type="button"
-            [disabled]="store.selectedValues().length === 0"
-            (click)="store.nextOdds()"
-            class="rounded-md bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            Ďalší kurz
-          </button>
         </div>
+        <div>
+          <label for="bookmaker" class="block text-label text-ink-muted">Bookmaker</label>
+          <select
+            #select
+            id="bookmaker"
+            (change)="store.setBookmaker(select.value)"
+            class="field mt-1.5 sm:w-56"
+          >
+            @for (bookmaker of store.bookmakers(); track bookmaker.key) {
+              <option [value]="bookmaker.key" [selected]="bookmaker.key === store.bookmaker()?.key">
+                {{ bookmaker.title }}
+              </option>
+            }
+          </select>
+        </div>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="store.selectedValues().length === 0"
+          (click)="store.nextOdds()"
+        >
+          Ďalší kurz
+        </button>
+      </div>
 
-        <p class="mb-4 text-sm text-slate-500" aria-live="polite">
-          @if (store.highlightedValue(); as value) {
-            Zvýraznený kurz: <strong>{{ value | number: '1.2-2' }}</strong>
-          } @else if (store.selectedMatchId()) {
-            Stláčaj Ďalší kurz, kurzy sa zvýraznia od najvyššieho.
-          } @else {
-            Vyber zápas tlačidlom Vybrať a stláčaj Ďalší kurz.
-          }
-        </p>
-      }
+      <p class="mb-4 text-label font-normal text-ink-muted" aria-live="polite">
+        @if (store.highlightedValue(); as value) {
+          Zvýraznený kurz:
+          <strong class="font-mono text-cyan">{{ value | number: '1.2-2' }}</strong>
+        } @else if (store.selectedMatchId()) {
+          Stláčaj Ďalší kurz, kurzy sa zvýraznia od najvyššieho.
+        } @else {
+          Vyber zápas tlačidlom Vybrať a stláčaj Ďalší kurz.
+        }
+      </p>
 
       @if (store.rows().length === 0) {
-        @if (store.matches().length > 0) {
-          <app-empty-state heading="Žiadne zápasy pre „{{ store.query() }}“">
-            <p>Skús iný názov tímu alebo vymaž vyhľadávanie.</p>
-          </app-empty-state>
-        } @else {
-          <app-empty-state heading="Žiadne zápasy">
-            <p>Pre túto súťaž momentálne nie sú vypísané žiadne zápasy.</p>
-          </app-empty-state>
-        }
+        <app-empty-state heading="Žiadne zápasy pre „{{ store.query() }}“">
+          <p>Skús iný názov tímu alebo vymaž vyhľadávanie.</p>
+          <!-- The button disappears with the empty state, so focus goes back to the search box. -->
+          <button type="button" class="btn btn-ghost" (click)="store.setQuery(''); search.focus()">
+            Vymazať filter
+          </button>
+        </app-empty-state>
       } @else {
-        <cdk-virtual-scroll-viewport scrollWindow [itemSize]="rowHeight">
+        <cdk-virtual-scroll-viewport scrollWindow [itemSize]="rowHeight()">
           <app-match-row
             *cdkVirtualFor="let row of store.rows(); trackBy: trackById"
             [row]="row"
@@ -105,4 +121,4 @@
       }
     }
   }
-</div>
+}
