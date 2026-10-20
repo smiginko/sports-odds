@@ -33,24 +33,25 @@
         <h2 class="mb-3 text-eyebrow text-ink uppercase">Projekt</h2>
         <ul class="flex flex-col gap-2 text-sm">
           <li>
-            <a
-              href="https://github.com/smiginko/sports-odds"
-              class="hover:text-cyan hover:underline"
-            >
-              Zdrojový kód na GitHube
-            </a>
-          </li>
-          <li>
             <a href="https://the-odds-api.com" class="hover:text-cyan hover:underline">
               Dáta: The Odds API v4
             </a>
           </li>
           <li>
             <a
-              href="https://github.com/smiginko/sports-odds#readme"
+              href="https://the-odds-api.com/liveapi/guides/v4/"
               class="hover:text-cyan hover:underline"
             >
-              Ako to vzniklo (README)
+              Dokumentácia API
+            </a>
+          </li>
+          <li>
+            <a
+              [routerLink]="['/sports', 'soccer_epl']"
+              [queryParams]="{ demo: true }"
+              class="hover:text-cyan hover:underline"
+            >
+              Demo s 1 000 zápasmi
             </a>
           </li>
         </ul>
