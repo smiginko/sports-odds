@@ -1,5 +1,5 @@
-import { Service, Signal } from '@angular/core';
-import { interval, map, Observable } from 'rxjs';
+import { DOCUMENT, inject, Service, Signal } from '@angular/core';
+import { filter, interval, map, Observable } from 'rxjs';
 import { Match, Odds } from '../../core/models/match';
 import { randomPrice } from './demo-matches';
 
@@ -17,6 +17,8 @@ export interface OddsChange {
 /** Simulated live odds: there is no push API, so new prices are generated locally. */
 @Service()
 export class OddsTicker {
+  private readonly document = inject(DOCUMENT);
+
   /**
    * Every 2 s picks 20 random offered odds of the given bookmaker and gives each a new price.
    * Signals are read on every tick, so a new bookmaker or new data apply immediately.
@@ -24,8 +26,11 @@ export class OddsTicker {
   changes(
     matches: Signal<Match[]>,
     bookmakerKey: Signal<string | undefined>,
+    live: Signal<boolean>,
   ): Observable<OddsChange[]> {
     return interval(TICK_MS).pipe(
+      // Skip the tick while the user paused it or the tab is in the background.
+      filter(() => live() && this.document.visibilityState === 'visible'),
       map(() => pickChanges(matches(), bookmakerKey(), CHANGES_PER_TICK)),
     );
   }

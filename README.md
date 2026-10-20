@@ -76,15 +76,15 @@ HTTP sa v testoch nahrádza cez `HttpTestingController`, `OddsApi` v teste store
 
 ## Stav zadania
 
-| Časť                      | Stav   | Čo obsahuje                                                                                                                                       |
-| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Základ                    | Hotovo | Stránky Športy, Zápasy, Prihlásenie, Klient; načítavanie, prázdny výsledok a chyba s tlačidlom Skúsiť znova                                       |
-| A – Interakcie            | Hotovo | Detail zápasu so zvýraznením najvyššieho kurzu, Obľúbené, vyhľadávanie podľa tímu, výber bookmakera, tlačidlo Ďalší kurz                          |
-| B – Väčší dataset a stav  | Hotovo | Virtual scroll (CDK), demo režim s 1 000 zápasmi, stav dát, požiadaviek, filtrov a obľúbených v NgRx Signal Store, ochrana pred staršou odpoveďou |
-| C – Live update kurzov    | Hotovo | Služba každé 2 s zmení 20 náhodných kurzov (1,00 – 5,00), zmena blikne na zeleno alebo na červeno so šípkou ▲/▼                                   |
-| D – Technické rozhodnutia | Hotovo | Návrh v časti [Rozšírenie D](#rozšírenie-d-technické-rozhodnutia)                                                                                 |
-| Voliteľný tooling         | Hotovo | ESLint, 11 unit testov (Vitest) a pravidlá pre AI agenta v [`AGENTS.md`](AGENTS.md)                                                               |
-| Dizajn                    | Hotovo | Tmavý dizajn Oddline: tokeny v Tailwinde, vlastné písma, hlavička, pätička, mobilná lišta, všetky stránky                                         |
+| Časť                      | Stav   | Čo obsahuje                                                                                                                                                       |
+| ------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Základ                    | Hotovo | Stránky Športy, Zápasy, Prihlásenie, Klient; načítavanie, prázdny výsledok a chyba s tlačidlom Skúsiť znova                                                       |
+| A – Interakcie            | Hotovo | Detail zápasu so zvýraznením najvyššieho kurzu, Obľúbené, vyhľadávanie podľa tímu, výber bookmakera, tlačidlo Ďalší kurz                                          |
+| B – Väčší dataset a stav  | Hotovo | Virtual scroll (CDK), demo režim s 1 000 zápasmi, stav dát, požiadaviek, filtrov a obľúbených v NgRx Signal Store, ochrana pred staršou odpoveďou                 |
+| C – Live update kurzov    | Hotovo | Služba každé 2 s zmení 20 náhodných kurzov (1,00 – 5,00), zmena blikne na zeleno alebo na červeno so šípkou ▲/▼; zmeny sa dajú pozastaviť a v skrytej karte stoja |
+| D – Technické rozhodnutia | Hotovo | Návrh v časti [Rozšírenie D](#rozšírenie-d-technické-rozhodnutia)                                                                                                 |
+| Voliteľný tooling         | Hotovo | ESLint, 11 unit testov (Vitest) a pravidlá pre AI agenta v [`AGENTS.md`](AGENTS.md)                                                                               |
+| Dizajn                    | Hotovo | Tmavý dizajn Oddline: tokeny v Tailwinde, vlastné písma, hlavička, pätička, mobilná lišta, všetky stránky                                                         |
 
 ## Architektúra
 
@@ -113,6 +113,7 @@ Hlavné rozhodnutia:
 - **Prihlásenie cez Signal Forms** (stabilné v Angulari 22). Do localStorage sa ukladá iba email, stránku `/client` chráni funkcionálny guard.
 - **Virtual scroll** s pevnou výškou riadku (stabilná stratégia CDK): 80 px na desktope, 160 px na mobile, prepína ju `BreakpointObserver` pri tom istom breakpointe ako Tailwind. Z 1 000+ zápasov je v DOM-e naraz len okolo desiatich riadkov.
 - **Bliknutie kurzov** cez `effect` a Web Animations API, farba aj šípka ▲/▼. Kľúč zápas:bookmaker:výsledok zabráni falošnému bliknutiu pri recyklácii riadkov a pri zmene bookmakera; rešpektuje sa `prefers-reduced-motion`.
+- **Pauza live update.** Tlačidlo „Pozastaviť zmeny kurzov“ (obsah, ktorý sa sám obnovuje, musí ísť zastaviť, WCAG 2.2.2) a v skrytej karte sa zmeny nedejú (`document.visibilityState`). `OddsTicker` vtedy tik zahodí operátorom `filter`.
 
 ## Dizajn
 
@@ -149,7 +150,7 @@ Navrhujem inú implementáciu, z troch dôvodov:
 **Návrh:**
 
 - Kurzy sťahuje **server raz pre všetkých** (ten istý proxy) v intervale dohodnutom s produktom podľa toho, ako často sa kurzy reálne menia, a zmeny posiela klientom cez **Server-Sent Events** alebo WebSocket.
-- Klient pri skrytej karte (`document.visibilityState`, udalosť `visibilitychange`) aktualizácie pozastaví a po návrate si hneď načíta čerstvé dáta, takže používateľ nikdy nevidí staré kurzy.
+- Klient pri skrytej karte (`document.visibilityState`, udalosť `visibilitychange`) aktualizácie pozastaví a po návrate si hneď načíta čerstvé dáta, takže používateľ nikdy nevidí staré kurzy. Pozastavenie v skrytej karte aplikácia robí už dnes so simulovanými kurzami.
 - Aktualizácie bežia iba na stránkach s kurzami. Tak to funguje už dnes: live update žije v `MatchesStore` a zastaví sa s odchodom zo stránky.
 
 V aplikácii je live update z rozšírenia C **simulovaný** (`OddsTicker`), aby nemíňal kredity. Pri skutočných aktualizáciách zo servera by sa v `OddsTicker` iba nahradil `interval(2000)` prúdom zo servera; store, nemenné úpravy stavu aj bliknutie ostanú bez zmeny.
@@ -171,7 +172,6 @@ V aplikácii je live update z rozšírenia C **simulovaný** (`OddsTicker`), aby
 
 - Ďalšie testy: `OddsTicker`, `FavoritesStore` (ukladanie do localStorage), detail zápasu.
 - Serverový proxy s cache a Server-Sent Events podľa rozšírenia D.
-- Pozastavenie live update v skrytej karte.
 - Vyhľadávanie bez ohľadu na diakritiku a samostatné hlášky pre prekročenie limitu (429) a výpadok pripojenia.
 - End-to-end test hlavného toku (napríklad Playwright).
 - Po odobratí zápasu na stránke Obľúbené presunúť fokus na ďalší riadok; teraz zmizne spolu s riadkom.

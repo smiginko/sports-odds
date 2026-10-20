@@ -10,11 +10,17 @@
     <p class="text-eyebrow text-volt uppercase">Zápasy a kurzy 1 · X · 2</p>
     <h1 class="mt-1 font-display text-display">{{ store.title() }}</h1>
   </div>
-  <div class="flex items-center gap-2">
+  <div class="flex flex-wrap items-center gap-2">
     @if (demo()) {
       <span class="rounded-sm bg-ember px-2 py-0.5 text-eyebrow text-on-ember uppercase">
         Demo
       </span>
+    }
+    <!-- Live odds update by themselves, so they must be possible to stop (WCAG 2.2.2). -->
+    @if (store.matches().length > 0) {
+      <button type="button" class="btn btn-ghost" (click)="store.toggleLive()">
+        {{ store.live() ? 'Pozastaviť zmeny kurzov' : 'Spustiť zmeny kurzov' }}
+      </button>
     }
     <a [routerLink]="[]" [queryParams]="{ demo: demo() ? null : true }" class="btn btn-ghost">
       @if (demo()) {

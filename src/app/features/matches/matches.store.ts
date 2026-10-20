@@ -26,6 +26,8 @@ interface MatchesState {
   selectedMatchId: string | null;
   /** Position in the selected match's odds sorted from highest; `null` = nothing highlighted. */
   highlightIndex: number | null;
+  /** `false` = the user paused the live odds changes. */
+  live: boolean;
 }
 
 const initialState: MatchesState = {
@@ -36,6 +38,7 @@ const initialState: MatchesState = {
   bookmakerKey: null,
   selectedMatchId: null,
   highlightIndex: null,
+  live: true,
 };
 
 export interface OddsCell {
@@ -129,6 +132,9 @@ export const MatchesStore = signalStore(
       const index = store.highlightIndex();
       patchState(store, { highlightIndex: index === null ? 0 : (index + 1) % count });
     },
+    toggleLive(): void {
+      patchState(store, { live: !store.live() });
+    },
     load: rxMethod<{ sportKey: string; demo: boolean }>(
       pipe(
         tap(() => patchState(store, { status: 'loading' })),
@@ -152,7 +158,7 @@ export const MatchesStore = signalStore(
     onInit() {
       // Live updates run as long as the store lives, i.e. while the matches page is open.
       const bookmakerKey = computed(() => store.bookmaker()?.key);
-      store.applyChanges(ticker.changes(store.matches, bookmakerKey));
+      store.applyChanges(ticker.changes(store.matches, bookmakerKey, store.live));
     },
   })),
 );
