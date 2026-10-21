@@ -46,7 +46,7 @@ Angular aplikácia, ktorá zobrazuje športové súťaže, zápasy a kurzy 1 / X
 ## API kľúč
 
 - Kľúč je v súbore `.env`, ktorý je v `.gitignore`. Funguje aj systémová premenná prostredia `ODDS_API_KEY`.
-- Aplikácia volá iba relatívne adresy `/api/...`. Dev server ich cez [`proxy.conf.mjs`](proxy.conf.mjs) prepošle na `api.the-odds-api.com` a pridá kľúč. Kľúč sa tak nedostane do JavaScriptu v prehliadači ani do gitu.
+- Aplikácia volá iba relatívne adresy `/api/...`. Dev server ich cez [`proxy.conf.mjs`](proxy.conf.mjs) prepošle na `api.the-odds-api.com` a pridá kľúč až do odchádzajúcej požiadavky. Kľúč sa tak nedostane do JavaScriptu v prehliadači, do gitu ani do chybových výpisov dev servera.
 - Bez kľúča (alebo s neplatným kľúčom) aplikácia zobrazí hlášku o probléme s API kľúčom.
 - Spotreba kreditov: zoznam súťaží je zadarmo, každé otvorenie zoznamu zápasov alebo detailu zápasu stojí 1 kredit. Bezplatný plán má 500 kreditov mesačne. Live update kurzov API nevolá.
 - Po zmene `.env` treba `npm start` reštartovať.
