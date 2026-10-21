@@ -166,7 +166,6 @@ V aplikácii je live update z rozšírenia C **simulovaný** (`OddsTicker`), aby
 - Vyhľadávanie nerozlišuje veľké a malé písmená, ale rozlišuje diakritiku.
 - Odpovede API sa necachujú, každé otvorenie zoznamu zápasov alebo detailu stojí kredit.
 - Unit testy pokrývajú iba najdôležitejšiu logiku; bliknutie, virtual scroll a šablóny testované nie sú.
-- Z návrhu dizajnu chýba vyhľadávanie súťaží, odznak „live“ a kontrolný zoznam pravidiel hesla. Boli by to nové funkcie mimo zadania.
 
 ## Čo by som riešil ďalej
 
