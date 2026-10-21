@@ -169,8 +169,17 @@ V aplikácii je live update z rozšírenia C **simulovaný** (`OddsTicker`), aby
 
 ## Čo by som riešil ďalej
 
+### Technické vylepšenia
+
 - Ďalšie testy: `OddsTicker`, `FavoritesStore` (ukladanie do localStorage), detail zápasu.
 - Serverový proxy s cache a Server-Sent Events podľa rozšírenia D.
 - Vyhľadávanie bez ohľadu na diakritiku a samostatné hlášky pre prekročenie limitu (429) a výpadok pripojenia.
 - End-to-end test hlavného toku (napríklad Playwright).
 - Po odobratí zápasu na stránke Obľúbené presunúť fokus na ďalší riadok; teraz zmizne spolu s riadkom.
+
+### Rozšírenie aplikácie
+
+- **Simulácia stávkovania s virtuálnym zostatkom.** Kliknutím na kurz sa tip pridá na tiket, používateľ zadá vklad a vidí možnú výhru (vklad × kurz, pri kombinovanom tikete súčin kurzov). Hrá sa o virtuálny zostatok, nie o skutočné peniaze, a vklad nesmie prevýšiť zostatok. Stav by držal nový `BetSlipStore` v `root` uložený v localStorage (tipy, vklad, zostatok, história tiketov), možná výhra by bola `computed`. Kurz sa pri podaní tiketu zamkne; ak ho medzitým zmení live update, tiket na to upozorní. Po skončení zápasu by sa tiket vyhodnotil cez `GET /v4/sports/{sport}/scores` a výhra by sa pripísala na zostatok.
+- **Výsledky zápasov.** Skóre z `/scores` pri prebiehajúcich zápasoch a pri skončených zápasoch v Obľúbených, namiesto hlášky, že sa zápas nenašiel. Aj toto volanie stojí kredit.
+- **Vývoj kurzu.** Posledné hodnoty kurzu a malý graf v detaile zápasu, aby bolo vidieť, či kurz rastie alebo klesá.
+- **Pravdepodobnosť a marža bookmakera.** V detaile pravdepodobnosť z kurzu (1 / kurz) a marža bookmakera (súčet 1 / kurz pre 1, X a 2 mínus 1); bookmaker s najnižšou maržou by sa zvýraznil.
